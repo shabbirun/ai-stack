@@ -14,11 +14,16 @@ export async function middleware(request: NextRequest) {
 
   if (!isCourseRoute && !isAdminRoute) return supabaseResponse
 
-  if (!user) {
-    return NextResponse.redirect(new URL('/login', request.url))
+  function redirectWithCookies(url: string) {
+    const redirect = NextResponse.redirect(new URL(url, request.url))
+    supabaseResponse.cookies.getAll().forEach(cookie => {
+      redirect.cookies.set(cookie.name, cookie.value)
+    })
+    return redirect
   }
 
-  // Check profile for payment + admin status
+  if (!user) return redirectWithCookies('/login')
+
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
@@ -36,13 +41,8 @@ export async function middleware(request: NextRequest) {
     .eq('id', user.id)
     .single()
 
-  if (isAdminRoute && !profile?.is_admin) {
-    return NextResponse.redirect(new URL('/dashboard', request.url))
-  }
-
-  if (isCourseRoute && !profile?.has_paid) {
-    return NextResponse.redirect(new URL('/pay', request.url))
-  }
+  if (isAdminRoute && !profile?.is_admin) return redirectWithCookies('/dashboard')
+  if (isCourseRoute && !profile?.has_paid) return redirectWithCookies('/pay')
 
   return supabaseResponse
 }

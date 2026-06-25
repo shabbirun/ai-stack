@@ -7,17 +7,20 @@ type Props = { lessonId: string; userId: string }
 export async function CommentSection({ lessonId, userId }: Props) {
   const supabase = await createClient()
 
-  const [{ data: commentsRaw }, { data: profile }, { data: profileEmails }] = await Promise.all([
-    supabase
-      .from('comments')
-      .select('*')
-      .eq('lesson_id', lessonId)
-      .order('created_at', { ascending: true }),
-    supabase.from('profiles').select('is_admin').eq('id', userId).single(),
-    supabase.from('profiles').select('id, email'),
-  ])
+  const { data: commentsRaw } = await supabase
+    .from('comments')
+    .select('*')
+    .eq('lesson_id', lessonId)
+    .order('created_at', { ascending: true })
 
   const comments: Comment[] = commentsRaw ?? []
+
+  const [{ data: profile }, { data: profileEmails }] = await Promise.all([
+    supabase.from('profiles').select('is_admin').eq('id', userId).single(),
+    comments.length > 0
+      ? supabase.from('profiles').select('id, email').in('id', [...new Set(comments.map(c => c.user_id))])
+      : Promise.resolve({ data: [] }),
+  ])
 
   const emailMap: Record<string, string> = {}
   ;(profileEmails ?? []).forEach((p: { id: string; email: string | null }) => {

@@ -6,14 +6,31 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 
 function PayContent() {
   const [loading, setLoading] = useState(false)
+  const [error, setError] = useState('')
   const params = useSearchParams()
   const cancelled = params.get('payment') === 'cancelled'
 
   async function handleCheckout() {
     setLoading(true)
-    const res = await fetch('/api/stripe/checkout', { method: 'POST' })
-    const { url } = await res.json()
-    window.location.href = url
+    setError('')
+    try {
+      const res = await fetch('/api/stripe/checkout', { method: 'POST' })
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}))
+        setError(body.error ?? 'Something went wrong. Please try again.')
+        return
+      }
+      const { url } = await res.json()
+      if (!url) {
+        setError('No checkout URL returned. Please try again.')
+        return
+      }
+      window.location.href = url
+    } catch {
+      setError('Network error. Please try again.')
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (
@@ -25,6 +42,7 @@ function PayContent() {
         {cancelled && (
           <p className="text-sm text-yellow-600">Payment cancelled. Try again when you're ready.</p>
         )}
+        {error && <p className="text-sm text-red-500">{error}</p>}
         <div>
           <p className="text-4xl font-bold">$97</p>
           <p className="text-muted-foreground text-sm mt-1">one-time payment</p>

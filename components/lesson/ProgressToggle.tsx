@@ -25,7 +25,7 @@ export function ProgressToggle({ lessonId, userId, initialCompleted }: Props) {
     } else {
       await supabase
         .from('lesson_progress')
-        .upsert({ lesson_id: lessonId, user_id: userId })
+        .upsert({ lesson_id: lessonId, user_id: userId }, { onConflict: 'user_id,lesson_id' })
     }
 
     setCompleted(c => !c)

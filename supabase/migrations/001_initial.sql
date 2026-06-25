@@ -110,8 +110,14 @@ create policy "Users can insert own comments" on comments
   for insert with check (auth.uid() = user_id);
 create policy "Users can delete own comments" on comments
   for delete using (auth.uid() = user_id);
-create policy "Service role can delete any comment" on comments
-  for delete using (true);
+create policy "Admins can delete any comment" on comments
+  for delete using (
+    exists (
+      select 1 from profiles
+      where profiles.id = auth.uid()
+      and profiles.is_admin = true
+    )
+  );
 
 -- Lesson requests
 create table lesson_requests (

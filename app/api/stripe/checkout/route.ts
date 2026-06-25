@@ -29,5 +29,9 @@ export async function POST() {
     cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/pay?payment=cancelled`,
   })
 
+  if (!session.url) {
+    return NextResponse.json({ error: 'Failed to create checkout session' }, { status: 500 })
+  }
+
   return NextResponse.json({ url: session.url })
 }
