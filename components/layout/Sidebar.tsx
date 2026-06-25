@@ -5,6 +5,7 @@ import { CheckCircle2, Circle, ChevronDown, ChevronRight, BookOpen, MessageSquar
 import { cn } from '@/lib/utils'
 import type { ModuleWithLessons } from '@/lib/types'
 import { useState } from 'react'
+import { LogoutButton } from './LogoutButton'
 
 type Props = {
   modules: ModuleWithLessons[]
@@ -55,6 +56,9 @@ export function Sidebar({ modules, completedLessonIds }: Props) {
           <MessageSquarePlus className="w-4 h-4" />
           Request a lesson
         </Link>
+        <div className="mt-2">
+          <LogoutButton />
+        </div>
       </div>
     </aside>
   )
