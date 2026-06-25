@@ -9,7 +9,8 @@ export async function middleware(request: NextRequest) {
 
   const isCourseRoute = path.startsWith('/dashboard') ||
     path.startsWith('/lesson') ||
-    path.startsWith('/requests')
+    path.startsWith('/requests') ||
+    path.startsWith('/profile')
   const isAdminRoute = path.startsWith('/admin')
 
   if (!isCourseRoute && !isAdminRoute) return supabaseResponse

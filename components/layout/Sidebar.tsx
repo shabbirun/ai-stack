@@ -1,7 +1,7 @@
 'use client'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { CheckCircle2, Circle, ChevronDown, ChevronRight, BookOpen, MessageSquarePlus } from 'lucide-react'
+import { CheckCircle2, Circle, ChevronDown, ChevronRight, BookOpen, MessageSquarePlus, UserCircle } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import type { ModuleWithLessons } from '@/lib/types'
 import { useState } from 'react'
@@ -55,6 +55,11 @@ export function Sidebar({ modules, completedLessonIds }: Props) {
           className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors">
           <MessageSquarePlus className="w-4 h-4" />
           Request a lesson
+        </Link>
+        <Link href="/profile"
+          className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors mt-2">
+          <UserCircle className="w-4 h-4" />
+          Profile
         </Link>
         <div className="mt-2">
           <LogoutButton />

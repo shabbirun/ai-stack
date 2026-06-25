@@ -26,8 +26,7 @@ export default function SignupPage() {
       setLoading(false)
       return
     }
-    router.push('/pay')
-    router.refresh()
+    router.push(`/signup/confirm?email=${encodeURIComponent(email)}`)
   }
 
   return (
