@@ -1,11 +1,47 @@
-// Placeholder — full implementation in Task 11
+import { createClient } from '@/lib/supabase/server'
+import { CommentClientSection } from './CommentClientSection'
+import type { Comment } from '@/lib/types'
+
 type Props = { lessonId: string; userId: string }
 
 export async function CommentSection({ lessonId, userId }: Props) {
+  const supabase = await createClient()
+
+  const [{ data: commentsRaw }, { data: profile }, { data: profileEmails }] = await Promise.all([
+    supabase
+      .from('comments')
+      .select('*')
+      .eq('lesson_id', lessonId)
+      .order('created_at', { ascending: true }),
+    supabase.from('profiles').select('is_admin').eq('id', userId).single(),
+    supabase.from('profiles').select('id, email'),
+  ])
+
+  const comments: Comment[] = commentsRaw ?? []
+
+  const emailMap: Record<string, string> = {}
+  ;(profileEmails ?? []).forEach((p: { id: string; email: string | null }) => {
+    if (p.email) emailMap[p.id] = p.email
+  })
+
+  const enriched: Comment[] = comments.map(c => ({
+    ...c,
+    author_email: emailMap[c.user_id] ?? undefined,
+  }))
+
+  const topLevel = enriched.filter(c => !c.parent_id)
+  const replies = enriched.filter(c => !!c.parent_id)
+
   return (
-    <div className="space-y-4">
-      <h2 className="font-semibold">Comments</h2>
-      <p className="text-sm text-muted-foreground">Comments coming soon.</p>
+    <div className="space-y-6">
+      <h2 className="font-semibold">Comments ({topLevel.length})</h2>
+      <CommentClientSection
+        lessonId={lessonId}
+        userId={userId}
+        isAdmin={profile?.is_admin ?? false}
+        topLevel={topLevel}
+        replies={replies}
+      />
     </div>
   )
 }
